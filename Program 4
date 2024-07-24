@@ -1,0 +1,67 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+void encrypt(char plaintext[], char key[]);
+void decrypt(char ciphertext[], char key[]);
+void adjustKey(char key[], int textLength);
+
+int main() {
+    char text[1000], key[100];
+    char choice;
+
+    printf("Enter the text: ");
+    fgets(text, sizeof(text), stdin);
+    text[strcspn(text, "\n")] = '\0';
+
+    printf("Enter the key: ");
+    fgets(key, sizeof(key), stdin);
+    key[strcspn(key, "\n")] = '\0';
+
+    printf("Encrypt or Decrypt (E/D): ");
+    scanf(" %c", &choice);
+
+    adjustKey(key, strlen(text));
+
+    if (toupper(choice) == 'E') {
+        encrypt(text, key);
+    } else if (toupper(choice) == 'D') {
+        decrypt(text, key);
+    } else {
+        printf("Invalid choice.\n");
+    }
+
+    return 0;
+}
+
+void encrypt(char plaintext[], char key[]) {
+    int len = strlen(plaintext);
+    for (int i = 0; i < len; i++) {
+        if (isalpha(plaintext[i])) {
+            char base = isupper(plaintext[i]) ? 'A' : 'a';
+            int shift = toupper(key[i]) - 'A';
+            plaintext[i] = ((plaintext[i] - base + shift) % 26) + base;
+        }
+    }
+    printf("Encrypted text: %s\n", plaintext);
+}
+
+void decrypt(char ciphertext[], char key[]) {
+    int len = strlen(ciphertext);
+    for (int i = 0; i < len; i++) {
+        if (isalpha(ciphertext[i])) {
+            char base = isupper(ciphertext[i]) ? 'A' : 'a';
+            int shift = toupper(key[i]) - 'A';
+            ciphertext[i] = ((ciphertext[i] - base - shift + 26) % 26) + base;
+        }
+    }
+    printf("Decrypted text: %s\n", ciphertext);
+}
+
+void adjustKey(char key[], int textLength) {
+    int keyLen = strlen(key);
+    for (int i = 0; i < textLength; i++) {
+        key[i] = key[i % keyLen];
+    }
+    key[textLength] = '\0';
+}
