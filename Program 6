@@ -1,0 +1,68 @@
+#include <stdio.h>
+#include <ctype.h>
+
+int modInverse(int a, int m);
+void decrypt(char ciphertext[], int a, int b);
+int findA(int e, int m);
+int findB(int a, int e, int c);
+
+int main() {
+    char ciphertext[1000] = "YOUR CIPHERTEXT HERE"; // Replace with your ciphertext
+    int e1 = 'E' - 'A'; // Most frequent letter in English
+    int e2 = 'T' - 'A'; // Second most frequent letter in English
+    int c1 = 'B' - 'A'; // Most frequent letter in ciphertext
+    int c2 = 'U' - 'A'; // Second most frequent letter in ciphertext
+    int a, b;
+
+    a = findA(e1, e2);
+    b = findB(a, e1, c1);
+
+    if (a == -1 || b == -1) {
+        printf("Cannot find valid a and b.\n");
+    } else {
+        decrypt(ciphertext, a, b);
+    }
+
+    return 0;
+}
+
+int modInverse(int a, int m) {
+    a = a % m;
+    for (int x = 1; x < m; x++) {
+        if ((a * x) % m == 1)
+            return x;
+    }
+    return -1;
+}
+
+void decrypt(char ciphertext[], int a, int b) {
+    int a_inv = modInverse(a, 26);
+    if (a_inv == -1) {
+        printf("No modular inverse for a.\n");
+        return;
+    }
+
+    for (int i = 0; ciphertext[i] != '\0'; i++) {
+        if (isalpha(ciphertext[i])) {
+            char base = isupper(ciphertext[i]) ? 'A' : 'a';
+            ciphertext[i] = (a_inv * (ciphertext[i] - base - b + 26) % 26 + 26) % 26 + base;
+        }
+    }
+
+    printf("Decrypted text: %s\n", ciphertext);
+}
+
+int findA(int e, int m) {
+    for (int a = 1; a < 26; a++) {
+        if (modInverse(a, 26) != -1) {
+            if ((a * e) % 26 == m) {
+                return a;
+            }
+        }
+    }
+    return -1;
+}
+
+int findB(int a, int e, int c) {
+    return (c - a * e + 26) % 26;
+}
